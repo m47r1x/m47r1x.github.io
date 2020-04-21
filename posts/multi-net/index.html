@@ -147,51 +147,51 @@
 </blockquote>
 <p>This seems to be exactly what I need. I&rsquo;ve two ISP providers, let&rsquo;s go ahead and connect two of my android devices via <em>USB Tethering</em> and <em>bond</em> both the connections and enter into the matrix!</p>
 <p>Wait&hellip;</p>
-<p>Bonding joins two physical network connections to the <!-- raw HTML omitted -->same network<!-- raw HTML omitted --> into 1 logical connection. [<a href="https://bbs.archlinux.org/viewtopic.php?pid=1185083#p1185083">1</a>]</p>
+<p>Bonding joins two physical network connections to the <em>same network</em> into 1 logical connection. [<a href="https://bbs.archlinux.org/viewtopic.php?pid=1185083#p1185083">1</a>]</p>
 <p>Ahh.. If only it were the old days, I could just plug in multiple RJ45 cables connected to a single network and increase the throughput but the world has now moved to the Internet and so has the Matrix.
 I must find another way&hellip;</p>
 <hr>
 <h1 id="multipath-routing">Multipath Routing<a href="#multipath-routing" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
-<p>First, let&rsquo;s connect to a WiFi network and Android USB tethering.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">    $ ip -br address
-    lo               UNKNOWN        127.0.0.1/8 ::1/128
-    enp1s0           DOWN
-    wlp2s0           UP             192.168.43.216/24 fe80::4ca5:1c7a:25de:4552/64
-    enp0s20f0u3      UNKNOWN        192.168.42.12/24 fe80::61f1:5894:3e86:3981/64
-</code></pre></div><p>Here <code>wlp2s0</code> denotes my wireless <em>interface</em> (the WiFi) and <code>enp0s20f0u3</code> denotes my USB tethered android device&rsquo;s interface.</p>
-<p>Every IP Packet needs to be <em>routed</em> in a <a href="http://linux-ip.net/html/routing-tables.html">routing table</a>.</p>
-<p>We can view the default routing table as:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">    $ ip route
-    default via 192.168.42.129 dev enp0s20f0u3 proto dhcp metric <span style="color:#ae81ff">100</span>
-    default via 192.168.43.1 dev wlp2s0 proto dhcp metric <span style="color:#ae81ff">600</span>
-    192.168.42.0/24 dev enp0s20f0u3 proto kernel scope link src 192.168.42.12 metric <span style="color:#ae81ff">100</span>
-    192.168.43.0/24 dev wlp2s0 proto kernel scope link src 192.168.43.216 metric <span style="color:#ae81ff">600</span>
-</code></pre></div><p>The IP address after &lsquo;<em>via</em>&rsquo; is the gateway ( say, router&rsquo;s IP ).</p>
-<p>In order to route our packets over two <em>interfaces</em> (USB Tethering and WiFi), declare two new routing tables:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">    <span style="color:#75715e"># echo 200 L1 &gt;&gt; /etc/iproute2/rt_tables</span>
-    <span style="color:#75715e"># echo 201 L2 &gt;&gt; /etc/iproute2/rt_tables</span>
-</code></pre></div><p>Numbers 200 and 201 are arbitrary.</p>
-<p>Before proceeding, declare some variables according to the above outputs [<a href="https://lartc.org/howto/lartc.rpdb.multiple-links.html">2</a>]:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">    $ IF1<span style="color:#f92672">=</span>wlp2s0
-    $ IF2<span style="color:#f92672">=</span>enp0s20f0u3
-    $ IP1<span style="color:#f92672">=</span>192.168.43.216
-    $ IP2<span style="color:#f92672">=</span>192.168.42.12
-    $ P1<span style="color:#f92672">=</span>192.168.43.1
-    $ P2<span style="color:#f92672">=</span>192.168.42.129
-    $ P1_NET<span style="color:#f92672">=</span>192.168.43.216/24
-    $ P2_NET<span style="color:#f92672">=</span>192.168.42.12/24
-</code></pre></div><p>Now, populate the routing tables (actual creation) to contain proper interfaces and gateway IPs</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">    <span style="color:#75715e"># ip route add $P1_NET dev $IF1 src $IP1 table T1</span>
-	  <span style="color:#75715e"># ip route add default via $P1 table T1</span>
-	  <span style="color:#75715e"># ip route add $P2_NET dev $IF2 src $IP2 table T2</span>
-	  <span style="color:#75715e"># ip route add default via $P2 table T2</span>
-</code></pre></div><p>Create rules, so that all connections coming on a interface get answered on the same interface. This is important, if a remote server requests some info via WiFi, you cannot just reply via USB Tethered connection and expect everything to work.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">    <span style="color:#75715e"># ip rule add from $IP1 table T1</span>
-	  <span style="color:#75715e"># ip rule add from $IP2 table T2</span>
-</code></pre></div><p>Now comes the juicy part. To set up a multipath route.</p>
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Multipath_routing">Multipath routing</a> is the routing technique of using multiple alternative paths through a network, which can yield a variety of benefits such as fault tolerance, increased bandwidth, or improved security.</p>
 </blockquote>
+<p>First, let&rsquo;s connect to a WiFi network and Android USB tethering.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ ip -br address
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+enp1s0           DOWN
+wlp2s0           UP             192.168.43.216/24 fe80::4ca5:1c7a:25de:4552/64
+enp0s20f0u3      UNKNOWN        192.168.42.12/24 fe80::61f1:5894:3e86:3981/64
+</code></pre></div><p>Here <code>wlp2s0</code> denotes my wireless <em>interface</em> (the WiFi) and <code>enp0s20f0u3</code> denotes my USB tethered android device&rsquo;s interface.</p>
+<p>Every IP Packet needs to be <em>routed</em> in a <a href="http://linux-ip.net/html/routing-tables.html">routing table</a>.</p>
+<p>We can view the default routing table as:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ ip route
+default via 192.168.42.129 dev enp0s20f0u3 proto dhcp metric <span style="color:#ae81ff">100</span>
+default via 192.168.43.1 dev wlp2s0 proto dhcp metric <span style="color:#ae81ff">600</span>
+192.168.42.0/24 dev enp0s20f0u3 proto kernel scope link src 192.168.42.12 metric <span style="color:#ae81ff">100</span>
+192.168.43.0/24 dev wlp2s0 proto kernel scope link src 192.168.43.216 metric <span style="color:#ae81ff">600</span>
+</code></pre></div><p>The IP address after &lsquo;<em>via</em>&rsquo; is the gateway ( say, router&rsquo;s IP ).</p>
+<p>In order to route our packets over two <em>interfaces</em> (USB Tethering and WiFi), declare two new routing tables:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># echo 200 L1 &gt;&gt; /etc/iproute2/rt_tables</span>
+<span style="color:#75715e"># echo 201 L2 &gt;&gt; /etc/iproute2/rt_tables</span>
+</code></pre></div><p>Numbers 200 and 201 are arbitrary.</p>
+<p>Before proceeding, declare some variables according to the above outputs [<a href="https://lartc.org/howto/lartc.rpdb.multiple-links.html">2</a>]:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ IF1<span style="color:#f92672">=</span>wlp2s0
+$ IF2<span style="color:#f92672">=</span>enp0s20f0u3
+$ IP1<span style="color:#f92672">=</span>192.168.43.216
+$ IP2<span style="color:#f92672">=</span>192.168.42.12
+$ P1<span style="color:#f92672">=</span>192.168.43.1
+$ P2<span style="color:#f92672">=</span>192.168.42.129
+$ P1_NET<span style="color:#f92672">=</span>192.168.43.216/24
+$ P2_NET<span style="color:#f92672">=</span>192.168.42.12/24
+</code></pre></div><p>Now, populate the routing tables (actual creation) to contain proper interfaces and gateway IPs</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># ip route add $P1_NET dev $IF1 src $IP1 table T1</span>
+<span style="color:#75715e"># ip route add default via $P1 table T1</span>
+<span style="color:#75715e"># ip route add $P2_NET dev $IF2 src $IP2 table T2</span>
+<span style="color:#75715e"># ip route add default via $P2 table T2</span>
+</code></pre></div><p>Create rules, so that all connections coming on a interface get answered on the same interface. This is important, if a remote server requests some info via WiFi, you cannot just reply via USB Tethered connection and expect everything to work.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># ip rule add from $IP1 table T1</span>
+<span style="color:#75715e"># ip rule add from $IP2 table T2</span>
+</code></pre></div><p>Now comes the juicy part. To set up a multipath route.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ ip route add default scope global nexthop via $P1 dev $IF1 weight <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>	    nexthop via $P2 dev $IF2 weight <span style="color:#ae81ff">1</span>
 </code></pre></div><p><em>Next hop</em> specifies the next router the packet should <em>hop</em> to. Here, two <code>nexthops</code> imply there are two possibilities with the respective weight.</p>
@@ -207,7 +207,7 @@ Find out your internet facing interfaces (say $IF1, $IF2) and issue:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">aria2c --multiple-interface $IF1,$IF2 https://download.tld/url.ext
 </code></pre></div><h1 id="wtf-">WTF ?<a href="#wtf-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p><strong>1. Internet is slower</strong> <br>
-The above steps roughly <em>split</em> the amount of connections over two interfaces (connections), if one of the connection is very slow, it would slow down everything. To avoid this, increase the weight for the faster connection.</p>
+The above steps roughly <em>split</em> the amount of packets over two interfaces (connections), if one of the connection is very slow, it would slow down everything. To avoid this, increase the weight for the faster connection.</p>
 <p><strong>2. ipecho.net is showing same IP every time in Firefox/Chrome.</strong> <br>
 The culprit could be cached connections or hell lot of other reasons. To verify it&rsquo;s working overall, check your IP on multiple websites (<a href="https://dgg.gg/?q=my+ip">duckduckgo</a>, <a href="https://ipecho.net">ipecho</a>, <a href="https://iplocation.net">iplocation</a> to name a few)</p>
 <p><strong>3. Something else ?</strong><br>

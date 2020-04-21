@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>The M47r1x</title>
-    <link>/</link>
-    <description>Recent content on The M47r1x</description>
+    <title>fast on The M47r1x</title>
+    <link>/tags/fast/</link>
+    <description>Recent content in fast on The M47r1x</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>(c) Zion</copyright>
     <lastBuildDate>Mon, 20 Apr 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/fast/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -22,15 +22,6 @@
  Kernel supports a magical module, called bonding
  Bonding: methods of combining (aggregating) multiple network connections in parallel in order to increase throughput
  This seems to be exactly what I need. I&amp;rsquo;ve two ISPs , let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/about/</guid>
-      <description>Neo  I know you&amp;rsquo;re out there. I can feel you now. I know that you&amp;rsquo;re afraid&amp;hellip; You&amp;rsquo;re afraid of us. You&amp;rsquo;re afraid of change. I don&amp;rsquo;t know the future. I didn&amp;rsquo;t come here to tell you how this is going to end. I came here to tell you how it&amp;rsquo;s going to begin. I&amp;rsquo;m going to hang up this phone, and then I&amp;rsquo;m going to show these people what you don&amp;rsquo;t want them to see.</description>
     </item>
     
   </channel>

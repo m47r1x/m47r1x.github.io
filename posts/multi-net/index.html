@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   
-    <title>Multiple connections - Faster internet ? :: Terminal — A simple, retro theme for Hugo</title>
+    <title>Multiple connections - Faster internet ? :: The M47r1x — The Return of Neo</title>
   
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <meta name="description" content="Neo, we must find a faster link, connection to the Matrix is congested. Hurry !
  Kernel supports a magical module, called bonding
  Bonding: methods of combining (aggregating) multiple network connections in parallel in order to increase throughput
- This seems to be exactly what I need. I&amp;rsquo;ve two ISP providers, let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!" />
-<meta name="keywords" content="" />
+ This seems to be exactly what I need. I&amp;rsquo;ve two ISPs , let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!" />
+<meta name="keywords" content="faster internet, fast, fast internet, multipath internet, two connection to internet, multiple connection to internet" />
 <meta name="robots" content="noodp" />
 <link rel="canonical" href="/posts/multi-net/" />
 
@@ -34,18 +34,18 @@
 
 <meta name="twitter:card" content="summary" />
 
-  <meta name="twitter:site" content="" />
+  <meta name="twitter:site" content="https://m47r1x.github.io" />
 
 <meta name="twitter:creator" content="" />
 
 
 <meta property="og:locale" content="en" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Multiple connections - Faster internet ? :: Terminal">
+<meta property="og:title" content="Multiple connections - Faster internet ? :: The M47r1x">
 <meta property="og:description" content="Neo, we must find a faster link, connection to the Matrix is congested. Hurry !
  Kernel supports a magical module, called bonding
  Bonding: methods of combining (aggregating) multiple network connections in parallel in order to increase throughput
- This seems to be exactly what I need. I&amp;rsquo;ve two ISP providers, let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!" />
+ This seems to be exactly what I need. I&amp;rsquo;ve two ISPs , let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!" />
 <meta property="og:url" content="/posts/multi-net/" />
 <meta property="og:site_name" content="Multiple connections - Faster internet ?" />
 
@@ -56,6 +56,8 @@
 <meta property="og:image:width" content="2048">
 <meta property="og:image:height" content="1024">
 
+
+  <meta property="article:published_time" content="2020-04-20 00:00:00 &#43;0000 UTC" />
 
 
 
@@ -79,7 +81,7 @@
     <div class="header__logo">
       <a href="/">
   <div class="logo">
-    Terminal
+    The M47r1x
   </div>
 </a>
 
@@ -95,10 +97,6 @@
           <li><a href="/about">About</a></li>
         
       
-        
-          <li><a href="/showcase">Showcase</a></li>
-        
-      
       
     
 
@@ -109,10 +107,6 @@
     
       
         <li><a href="/about">About</a></li>
-      
-    
-      
-        <li><a href="/showcase">Showcase</a></li>
       
     
     
@@ -130,9 +124,23 @@
     <a href="/posts/multi-net/">Multiple connections - Faster internet ?</a></h1>
   <div class="post-meta">
       
+    <span class="post-date">
+      2020-04-20
+    </span>
+    
     
   </div>
 
+  
+  <span class="post-tags">
+    
+    #<a href="/tags/fast/">fast</a>&nbsp;
+    
+    #<a href="/tags/internet/">internet</a>&nbsp;
+    
+    #<a href="/tags/multipath/">multipath</a>&nbsp;
+    
+  </span>
   
 
   
@@ -145,7 +153,7 @@
 <blockquote>
 <p><strong>Bonding</strong>: methods of combining (aggregating) multiple network connections in parallel in order to increase throughput</p>
 </blockquote>
-<p>This seems to be exactly what I need. I&rsquo;ve two ISP providers, let&rsquo;s go ahead and connect two of my android devices via <em>USB Tethering</em> and <em>bond</em> both the connections and enter into the matrix!</p>
+<p>This seems to be exactly what I need. I&rsquo;ve two ISPs , let&rsquo;s go ahead and connect two of my android devices via <em>USB Tethering</em> and <em>bond</em> both the connections and enter into the matrix!</p>
 <p>Wait&hellip;</p>
 <p>Bonding joins two physical network connections to the <em>same network</em> into 1 logical connection. [<a href="https://bbs.archlinux.org/viewtopic.php?pid=1185083#p1185083">1</a>]</p>
 <p>Ahh.. If only it were the old days, I could just plug in multiple RJ45 cables connected to a single network and increase the throughput but the world has now moved to the Internet and so has the Matrix.
@@ -155,6 +163,7 @@ I must find another way&hellip;</p>
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Multipath_routing">Multipath routing</a> is the routing technique of using multiple alternative paths through a network, which can yield a variety of benefits such as fault tolerance, increased bandwidth, or improved security.</p>
 </blockquote>
+<p>Appears interesting. Link, try it!</p>
 <p>First, let&rsquo;s connect to a WiFi network and Android USB tethering.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ ip -br address
 lo               UNKNOWN        127.0.0.1/8 ::1/128
@@ -194,7 +203,7 @@ $ P2_NET<span style="color:#f92672">=</span>192.168.42.12/24
 </code></pre></div><p>Now comes the juicy part. To set up a multipath route.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ ip route add default scope global nexthop via $P1 dev $IF1 weight <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>	    nexthop via $P2 dev $IF2 weight <span style="color:#ae81ff">1</span>
-</code></pre></div><p><em>Next hop</em> specifies the next router the packet should <em>hop</em> to. Here, two <code>nexthops</code> imply there are two possibilities with the respective weight.</p>
+</code></pre></div><p><em>Next hop</em> specifies the next router the packet should <em>hop</em> to. Here, two <code>nexthops</code> imply there are two possibilities with the respective weights.</p>
 <h1 id="tldr">Tl;Dr<a href="#tldr" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>The Machines have written a <a href="https://gist.github.com/Hritik14/021fec2cd9bf8e9a4c0e302ae58d7b32">code to automate all this</a>.<br>
 Beware, it&rsquo;s the machines!</p>
@@ -218,6 +227,8 @@ Follow the white rabbit.</p>
 <li><a href="https://lartc.org/howto/lartc.rpdb.multiple-links.html">lartc</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Morpheus_(The_Matrix)#/media/File:Morpheus.jpg">Morpheus</a></li>
 </ul>
+<hr>
+<p>We&rsquo;re in. I&rsquo;ve to find Trinity.</p>
 
       </div></div>
   
@@ -232,8 +243,8 @@ Follow the white rabbit.</p>
     <footer class="footer">
   <div class="footer__inner">
     
-      <div class="copyright">
-        <span>© 2020 Powered by <a href="http://gohugo.io">Hugo</a></span>
+      <div class="copyright copyright--user">
+        <span>(c) Zion</span>
     
         <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
       </div>

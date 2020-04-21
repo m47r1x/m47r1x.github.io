@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Terminal</title>
+    <title>Posts on The M47r1x</title>
     <link>/posts/</link>
-    <description>Recent content in Posts on Terminal</description>
+    <description>Recent content in Posts on The M47r1x</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <copyright>(c) Zion</copyright>
+    <lastBuildDate>Mon, 20 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
     
@@ -13,13 +15,13 @@
     <item>
       <title>Multiple connections - Faster internet ?</title>
       <link>/posts/multi-net/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 20 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/posts/multi-net/</guid>
       <description>Neo, we must find a faster link, connection to the Matrix is congested. Hurry !
  Kernel supports a magical module, called bonding
  Bonding: methods of combining (aggregating) multiple network connections in parallel in order to increase throughput
- This seems to be exactly what I need. I&amp;rsquo;ve two ISP providers, let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!</description>
+ This seems to be exactly what I need. I&amp;rsquo;ve two ISPs , let&amp;rsquo;s go ahead and connect two of my android devices via USB Tethering and bond both the connections and enter into the matrix!</description>
     </item>
     
   </channel>

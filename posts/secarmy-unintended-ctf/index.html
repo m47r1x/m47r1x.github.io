@@ -143,9 +143,9 @@ Now, you gotta look through the system to find the flags. They looked something 
 <h2 id="the-forbidden-way">The Forbidden Way<a href="#the-forbidden-way" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>After solving a couple of challenges <em>the intended way</em>, one would notice that you gotta login to a different user account to find out the flag.
 Let&rsquo;s verify this assumption by looking at all the users in <code>/etc/passwd</code>
-<img src="/img/etcpasswd.png" alt="etc_passwd"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>The names look quite familiar, let&rsquo;s have a look at challenge names:
-<img src="/img/challange_names.png" alt="challange_names"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>Interesting! All the names match. So, all we gotta do is access the <code>$HOME</code> of every user. Unsurprisingly, by default, in this VM, there&rsquo;s no such direct way.
 What could we do ? Here are a few possibilities:</p>
 <ul>
@@ -156,19 +156,19 @@ What could we do ? Here are a few possibilities:</p>
 <p>We shall look at the last way.
 Close the current VM, then head over to VM settings and add a bootable Virtual Machine HDD. Here, I&rsquo;ll be using the one offered by <a href="https://www.parrotsec.org/download/" title="Parrot Security OVA">Parrot Sec</a>
 Here&rsquo;s how it&rsquo;ll look.
-<img src="/img/parrot_hdd_insert.png" alt="parrot_hdd_insert"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>Boot the VM again, this time keep hitting <code>F12</code>, you&rsquo;ll get the boot options:
-<img src="img/boot_options.png" alt="Boot Options"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>Yes! We&rsquo;re gonna boot the second Hard Disk. Choose 2 and the Parrot OS boots like a hot cheese slice.
 Let&rsquo;s open up a terminal inside our Parrot and look at the connected drives.
 <code>$ lsblk</code>
-<img src="/img/secarmy_lsblk.png" alt="lsblk"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>Voila! The <code>ubuntu--vg-ubuntu--lv</code> is the volume we want. <code>vg</code> and <code>lv</code> keywords make it quite apparent that it&rsquo;s an LVM. Let&rsquo;s mount it.
 <code>$ sudo mount /dev/mapper/ubuntu--vg-ubuntu--lv /mnt</code>
-<img src="/img/secarmy_mount_lvm.png" alt="mount block device"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>Mounted successfully! Head over to <code>/mnt/home</code> and let&rsquo;s simply grep all the files containing the flag format.
 <code>$ grep -P 'flag\d{.*}' -r</code>
-<img src="/img/secarmy_all_flags.png" alt="all flags"></p>
+{{ <!-- raw HTML omitted --> }}</p>
 <p>There you go! Easy as a cake. The root flag is located at <code>/mnt/root</code>, and you have everything you need.</p>
 <h2 id="how-had-they-been-avoided-it-">How had they been avoided it ?<a href="#how-had-they-been-avoided-it-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>In my opinion, there was no need of labeling an <em>unintended way</em>. A simple solution to this would have been to use encrypted LUKS volumes and mounting them on login. <a href="https://wiki.archlinux.org/index.php/Dm-crypt/Mounting_at_login" title="Mount encrypted partition on login">Here&rsquo;s how</a>.</p>

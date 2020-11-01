@@ -7,7 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>(c) Zion</copyright>
-    <lastBuildDate>Mon, 20 Apr 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 02 Nov 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Grayhat - Secarmy CTF :: The Unintended Way</title>
+      <link>/posts/secarmy-unintended-ctf/</link>
+      <pubDate>Mon, 02 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/secarmy-unintended-ctf/</guid>
+      <description>Once upon a time, a CTF was held. There were many ways to solve it, though none knew that one was The Unintended Way. Although, it does sound pretty unconventional and sad that in a CTF where you explore all the paths and explore wild possibilities, one of them was tagged as unintended and thus, invalid.
+Without further ado, let&amp;rsquo;s discover what it was.
+The CTF The CTF was hosted on vulnhub, you were provided with an ova virtualbox image.</description>
+    </item>
+    
     <item>
       <title>Multiple connections - Faster internet ?</title>
       <link>/posts/multi-net/</link>

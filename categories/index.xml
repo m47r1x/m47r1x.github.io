@@ -6,10 +6,6 @@
     <description>Recent content in Categories on The M47r1x</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>(c) Zion</copyright>
-    
-	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <copyright>(c) Zion</copyright><atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

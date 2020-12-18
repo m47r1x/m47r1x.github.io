@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Manually booting the Linux kernel inside QEMU :: The M47r1x — The Return of Neo</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="Shivering in this cold winter one would certainly stumble upon the question that the Linux Kernel, which operates most of your operating system, is just a huge C program.
+Shouldn&amp;rsquo;t it, then, be possible to compile and run it as you do to all your C programs ?
+Here, I&amp;rsquo;d be using the famous qemu emulator to run a pre compiled linux kernel. So, let&amp;rsquo;s begin.
+Theory We all hate this part but it deserves its position." />
+<meta name="keywords" content="kernel, boot, qemu, linux is kernel" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="/posts/linux-boot/" />
+
+
+
+
+<link rel="stylesheet" href="/assets/style.css">
+
+  <link rel="stylesheet" href="/assets/blue.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/img/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/img/favicon/blue.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  <meta name="twitter:site" content="https://m47r1x.github.io" />
+
+<meta name="twitter:creator" content="" />
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Manually booting the Linux kernel inside QEMU :: The M47r1x">
+<meta property="og:description" content="Shivering in this cold winter one would certainly stumble upon the question that the Linux Kernel, which operates most of your operating system, is just a huge C program.
+Shouldn&amp;rsquo;t it, then, be possible to compile and run it as you do to all your C programs ?
+Here, I&amp;rsquo;d be using the famous qemu emulator to run a pre compiled linux kernel. So, let&amp;rsquo;s begin.
+Theory We all hate this part but it deserves its position." />
+<meta property="og:url" content="/posts/linux-boot/" />
+<meta property="og:site_name" content="Manually booting the Linux kernel inside QEMU" />
+
+  
+    <meta property="og:image" content="/img/favicon/blue.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2020-12-18 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    The M47r1x
+  </div>
+</a>
+
+    </div>
+    <div class="menu-trigger">menu</div>
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="/posts/linux-boot/">Manually booting the Linux kernel inside QEMU</a></h1>
+  <div class="post-meta">
+      
+    <span class="post-date">
+      2020-12-18
+    </span>
+    
+    
+  </div>
+
+  
+
+  
+
+  <div class="post-content"><div>
+        <p>Shivering in this cold winter one would certainly stumble upon the question that the Linux Kernel, which operates most of your operating system, is just a huge C program.<br>
+Shouldn&rsquo;t it, then, be possible to compile and run it as you do to all your C programs ?</p>
+<p>Here, I&rsquo;d be using the famous <a href="https://www.qemu.org">qemu</a> emulator to run a pre compiled linux kernel. So, let&rsquo;s begin.</p>
+<h2 id="theory">Theory<a href="#theory" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>We all hate this part but it deserves its position.<br>
+Here&rsquo;s how a typical linux boot works after the kernel is loaded.<br>
+The kernel initializes and looks for an <code>initramfs</code>. This is a temporary root filesystem. Now, the kernel doesn&rsquo;t know if your real root is residing on a USB stick or a hard disk or RAID or god-knows-what. It cannot support everything, so it&rsquo;s the job of initramfs to store the <a href="https://en.wikipedia.org/wiki/Loadable_kernel_module">loadable kernel modules</a> and assist the kernel. In short, it complements the kernel.<br>
+After the Kernel has initialized keyboard, mouse etc, now it&rsquo;s the time to mount your hard disk (or say, the root filesystem) and then present you the fancy login screen where you can carry on with your journey.</p>
+<h2 id="get-your-tools">Get your tools<a href="#get-your-tools" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<ul>
+<li><a href="https://www.qemu.org">QEMU</a></li>
+<li>The Kernel</li>
+<li>fakeroot</li>
+</ul>
+<h2 id="the-kernel">The Kernel<a href="#the-kernel" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>You can find a pre-compiled kernel at <code>/boot/vmlinuz-linux</code></p>
+<h2 id="initramfs">Initramfs<a href="#initramfs" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>We&rsquo;d be creating this one. The tool at our disposal is <code>mkinitcpio</code></p>
+<p>Step zero would be to enter into the <code>fakeroot</code> environment. It makes you appear as root but you&rsquo;re not. This is required to make a proper initramfs.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ fakeroot
+</code></pre></div><p>then create a config file named <code>mkinitcpio.conf</code> with the following contents:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">MODULES<span style="color:#f92672">=(</span>ext4<span style="color:#f92672">)</span>
+HOOKS<span style="color:#f92672">=(</span>base systemd modconf sd-vconsole filesystems block keyboard<span style="color:#f92672">)</span>
+</code></pre></div><p>and the last step is to generate the initramfs</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># mkinitcpio -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g initramfs.img</span>
+</code></pre></div><p>Now, you have the initramfs in a file named <code>initramfs.img</code>.</p>
+<p>You can now safely exit the fakeroot environent by typing <code>exit</code>.</p>
+<h2 id="boot-the-kernel-using-qemu">Boot the kernel using QEMU<a href="#boot-the-kernel-using-qemu" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>After you have your hands on a compiled kernel and initramfs, you&rsquo;d be eager to boot it in a live environment. We can simulate the same using QEMU.</p>
+<p>Looking at <code>man qemu</code>, here are some interesting options</p>
+<pre><code class="language-man" data-lang="man">	-kernel bzImage
+	Use bzImage as kernel image. The kernel can be either a Linux kernel or in multiboot for‐
+	mat.  
+
+   -append cmdline
+		  Use cmdline as kernel command line
+
+   -initrd file
+		  Use file as initial ram disk.  
+
+</code></pre><p>Cool, we&rsquo;ve a kernel image, an initramfs, so why wait ? Let&rsquo;s boot right in.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img
+</code></pre></div><p>To your surprise, it yields:</p>
+
+  <img src="/posts//images/linux-boot/no-ram.jpg"  alt="no-ram"  class="center"  style="margin:20px"  />
+
+
+<p>The Kernel <em>panicked</em>. It typically happens when you try to boot without a RAM.<br>
+So, let&rsquo;s try adding a 1G of RAM.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img -m 1G
+</code></pre></div><p>Another roadblock!</p>
+
+  <img src="/posts//images/linux-boot/no-hdd.jpg"  alt="no-hdd"  class="center"  style="margin:20px"  />
+
+
+<p>Now, the kernel and the initramfs were done but you&rsquo;d need a hard disk where everything should carry on i.e. the Operating System.</p>
+<h2 id="add-a-hard-disk">Add a hard disk<a href="#add-a-hard-disk" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>First, we&rsquo;d be creating a <a href="https://en.wikipedia.org/wiki/Sparse_file">sparse file</a> of 2GB</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ dd <span style="color:#66d9ef">if</span><span style="color:#f92672">=</span>/dev/zero of<span style="color:#f92672">=</span>kernel-hd bs<span style="color:#f92672">=</span>1M count<span style="color:#f92672">=</span><span style="color:#ae81ff">2048</span>
+2048+0 records in
+2048+0 records out
+<span style="color:#ae81ff">2147483648</span> bytes <span style="color:#f92672">(</span>2.1 GB, 2.0 GiB<span style="color:#f92672">)</span> copied, 9.87468 s, <span style="color:#ae81ff">217</span> MB/s
+</code></pre></div><p>Now, a hard disk in itself isn&rsquo;t enough. You&rsquo;d need a filesystem (typically called <em>formatting the hard disk</em>). Let&rsquo;s create one.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ mkfs.ext4 kernel-hd
+mke2fs 1.45.6 <span style="color:#f92672">(</span>20-Mar-2020<span style="color:#f92672">)</span>
+Discarding device blocks: <span style="color:#66d9ef">done</span>
+Creating filesystem with <span style="color:#ae81ff">524288</span> 4k blocks and <span style="color:#ae81ff">131072</span> inodes
+Filesystem UUID: 3654d72f-3f6d-4d90-8848-2900d7c271d0
+Superblock backups stored on blocks:
+	32768, 98304, 163840, 229376, <span style="color:#ae81ff">294912</span>
+
+Allocating group tables: <span style="color:#66d9ef">done</span>
+Writing inode tables: <span style="color:#66d9ef">done</span>
+Creating journal <span style="color:#f92672">(</span><span style="color:#ae81ff">16384</span> blocks<span style="color:#f92672">)</span>: <span style="color:#66d9ef">done</span>
+Writing superblocks and filesystem accounting information: <span style="color:#66d9ef">done</span>
+</code></pre></div><p>We&rsquo;ve successfully created a filesystem in the virtual hard disk. Yay!</p>
+<h2 id="boot-the-kernel-with-the-hard-disk">Boot the kernel with the hard disk<a href="#boot-the-kernel-with-the-hard-disk" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Now, we&rsquo;ve everything set up. The only task at hand is to plug in the newly created hard disk to a QEMU VM and instruct the kernel to treat that hard disk as the <em>new_root</em>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img -m 1G -hda kernel-hd -append <span style="color:#e6db74">&#34;root=/dev/sda&#34;</span>
+</code></pre></div><p>
+  <img src="/posts//images/linux-boot/no-hdd2.jpg"  alt="no-hdd2"  class="center"  style="margin:20px"  />
+
+
+Wait, what !?</p>
+<p>Hmm, something is not quite right.<br>
+It turns out the kernel cannot continue to boot without some basic files (the OS) in the root filesystem (the hard disk)</p>
+<h2 id="populating-the-hard-disk">Populating the Hard Disk<a href="#populating-the-hard-disk" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>There are plently of ways you can find or generate the required files (say, a kernel-less Operating System). Here we&rsquo;ll use the packages provided by Arch.<br>
+Feel free to experiment about this.</p>
+<p>Install <code>pacstrap</code> by</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ sudo pacman -S arch-install-scripts
+</code></pre></div><p>Now mount the <code>kernel-hd</code> at <code>/mnt</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ sudo mount kernel-hd /mnt
+</code></pre></div><p>And populate the hard disk with Arch&rsquo;s base packages.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ sudo pacstrap /mnt base
+</code></pre></div><p>This will start a download of around 115MB. Note, that after this step, you <em>should</em> update your host Arch system soon. (<code>pacman -Syu</code>)</p>
+<p>The OS is ready but you&rsquo;re gonna need some login credentials to log in.<br>
+Set a root password in your little OS that you&rsquo;ve just created.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ sudo passwd --root /mnt root
+</code></pre></div><p>And finally unmount <code>kernel-hd</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ sudo umount kernel-hd
+</code></pre></div><h2 id="boot-our-handcrafted-system">Boot our handcrafted system<a href="#boot-our-handcrafted-system" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Rerun the following command</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img -m 1G -hda kernel-hd -append <span style="color:#e6db74">&#34;root=/dev/sda&#34;</span>
+</code></pre></div><p>and finally you&rsquo;ll be greeted with</p>
+
+  <img src="/posts//images/linux-boot/login-screen.jpg"  alt="login-screen"  class="center"  style="margin:20px"  />
+
+
+<p>Login with the credentials you set before and enjoy!</p>
+<h1 id="wtf-">WTF ?<a href="#wtf-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h2 id="root-account-is-locked">Root account is locked<a href="#root-account-is-locked" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>If something goes wrong in the initramfs phase and you see <code>root account is locked</code>, you can unlock the root account by creating a <code>mkinitcpio.conf</code> file as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Required</span>
+MODULES<span style="color:#f92672">=(</span>ext4<span style="color:#f92672">)</span>
+HOOKS<span style="color:#f92672">=(</span>base systemd modconf sd-vconsole filesystems block keyboard<span style="color:#f92672">)</span>
+
+<span style="color:#75715e"># Unlocking the root account</span>
+echo <span style="color:#e6db74">&#39;root:x:0:0:root:/root:/bin/sh&#39;</span> &gt; /tmp/passwd
+echo <span style="color:#e6db74">&#39;root:$6$drlHj0v2/B7liRyL$YH0ZHsG4d05mS6moBPkdzI5dlt9RjrPbWTCwDk7r5ZCWIGHFEx9A/atj/hPImYPq7qGzi8zGHOKqRgfHSfq7b/:18611:0:99999:7:::&#39;</span> &gt; /tmp/shadow
+add_file /tmp/passwd /etc/passwd <span style="color:#ae81ff">0644</span>
+add_file /tmp/shadow /etc/shadow <span style="color:#ae81ff">0600</span>
+</code></pre></div><p>and then regenerating the <code>initramfs.img</code> as shown before.<br>
+Remember to enter the <code>fakeroot</code> environment before generating the <code>initramfs.img</code>.
+This will enable you to login with the password <code>12345678</code></p>
+<h2 id="why-not-use-the-default-bootinitramfs-linuximg">Why not use the default /boot/initramfs-linux.img<a href="#why-not-use-the-default-bootinitramfs-linuximg" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>We have been using the same kernel that your host is using, located at <code>/boot/vmlinuz-linux</code>. So, it might sound better to use the host initramfs as well.<br>
+Theoretically, you should be able to just copy and use that but for reasons I&rsquo;ve faced and bashed my head over multiple times, I&rsquo;d recommend generating your own initramfs.</p>
+<h2 id="waiting-for-devsda-or-devsda-not-detected">Waiting for /dev/sda&hellip; or /dev/sda not detected<a href="#waiting-for-devsda-or-devsda-not-detected" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>It might be a qemu issue. You can try emulating SATA as mentioned <a href="sata">here</a>.<br>
+Basically, you&rsquo;d need to drop the <code>-hda kernel-hd</code> flag and use the one mentioned in the answer.<br>
+Thanks to <code>sheep</code> from freenode IRC for the suggestion.</p>
+<h2 id="why-arch-">Why Arch ?<a href="#why-arch-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Because it&rsquo;s the best. Feel free to write your own OS files. Maybe another time.</p>
+<h2 id="still-dont-want-arch">Still don&rsquo;t want Arch<a href="#still-dont-want-arch" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>Sure, you should head into <a href="http://www.linuxfromscratch.org/lfs/">Linux From Scratch</a>. Also, you may <a href="#root-account-is-locked">unlock the root account</a> and use <code>journalctl</code> to look into what the kernel is error-ing for.</p>
+<h1 id="afterwords">Afterwords<a href="#afterwords" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<p>Now you know that Linux itself is <strong>not</strong> an operating system. It&rsquo;s just a kernel. A part of the operating system. The entire operating system (or distro) consists of the kernel, accompanying initramfs, the root file system and the community.</p>
+
+      </div></div>
+  
+  <div class="pagination">
+    <div class="pagination__title">
+      <span
+        class="pagination__title-h">Read other posts</span>
+      <hr />
+    </div>
+    <div class="pagination__buttons">
+      
+      
+      <span class="button next">
+        <a href="/posts/secarmy-unintended-ctf/">
+          <span class="button__text">Grayhat -&gt; Secarmy CTF :: The Unintended Way</span>
+          <span class="button__icon">→</span>
+        </a>
+      </span>
+      
+    </div>
+  </div>
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>(c) Zion</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+<script src="/assets/main.js"></script>
+<script src="/assets/prism.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

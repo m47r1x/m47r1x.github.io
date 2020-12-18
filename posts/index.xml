@@ -7,7 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>(c) Zion</copyright>
-    <lastBuildDate>Mon, 02 Nov 2020 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 18 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Manually booting the Linux kernel inside QEMU</title>
+      <link>/posts/linux-boot/</link>
+      <pubDate>Fri, 18 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/linux-boot/</guid>
+      <description>Shivering in this cold winter one would certainly stumble upon the question that the Linux Kernel, which operates most of your operating system, is just a huge C program.
+Shouldn&amp;rsquo;t it, then, be possible to compile and run it as you do to all your C programs ?
+Here, I&amp;rsquo;d be using the famous qemu emulator to run a pre compiled linux kernel. So, let&amp;rsquo;s begin.
+Theory We all hate this part but it deserves its position.</description>
+    </item>
+    
     <item>
       <title>Grayhat -&gt; Secarmy CTF :: The Unintended Way</title>
       <link>/posts/secarmy-unintended-ctf/</link>

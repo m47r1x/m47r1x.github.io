@@ -10,7 +10,7 @@
 Shouldn&amp;rsquo;t it, then, be possible to compile and run it as you do to all your C programs ?
 Here, I&amp;rsquo;d be using the famous qemu emulator to run a pre compiled linux kernel. So, let&amp;rsquo;s begin.
 Theory We all hate this part but it deserves its position." />
-<meta name="keywords" content="kernel, boot, qemu, linux is kernel" />
+<meta name="keywords" content="kernel, boot, qemu, linux is kernel, OS, Operating System" />
 <meta name="robots" content="noodp" />
 <link rel="canonical" href="/posts/linux-boot/" />
 
@@ -160,7 +160,7 @@ After the Kernel has initialized keyboard, mouse etc, now it&rsquo;s the time to
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">MODULES<span style="color:#f92672">=(</span>ext4<span style="color:#f92672">)</span>
 HOOKS<span style="color:#f92672">=(</span>base systemd modconf sd-vconsole filesystems block keyboard<span style="color:#f92672">)</span>
 </code></pre></div><p>and the last step is to generate the initramfs</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># mkinitcpio -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g initramfs.img</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ mkinitcpio -k /boot/vmlinuz-linux -c /etc/mkinitcpio.conf -g initramfs.img
 </code></pre></div><p>Now, you have the initramfs in a file named <code>initramfs.img</code>.</p>
 <p>You can now safely exit the fakeroot environent by typing <code>exit</code>.</p>
 <h2 id="boot-the-kernel-using-qemu">Boot the kernel using QEMU<a href="#boot-the-kernel-using-qemu" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
@@ -179,18 +179,12 @@ HOOKS<span style="color:#f92672">=(</span>base systemd modconf sd-vconsole files
 </code></pre><p>Cool, we&rsquo;ve a kernel image, an initramfs, so why wait ? Let&rsquo;s boot right in.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img
 </code></pre></div><p>To your surprise, it yields:</p>
-
-  <img src="/posts//images/linux-boot/no-ram.jpg"  alt="no-ram"  class="center"  style="margin:20px"  />
-
-
+<p><img src="/images/linux-boot/no-ram.jpg" alt="no-ram"></p>
 <p>The Kernel <em>panicked</em>. It typically happens when you try to boot without a RAM.<br>
 So, let&rsquo;s try adding a 1G of RAM.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img -m 1G
 </code></pre></div><p>Another roadblock!</p>
-
-  <img src="/posts//images/linux-boot/no-hdd.jpg"  alt="no-hdd"  class="center"  style="margin:20px"  />
-
-
+<p><img src="/images/linux-boot/no-hdd.jpg" alt="no-hdd"></p>
 <p>Now, the kernel and the initramfs were done but you&rsquo;d need a hard disk where everything should carry on i.e. the Operating System.</p>
 <h2 id="add-a-hard-disk">Add a hard disk<a href="#add-a-hard-disk" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>First, we&rsquo;d be creating a <a href="https://en.wikipedia.org/wiki/Sparse_file">sparse file</a> of 2GB</p>
@@ -215,10 +209,7 @@ Writing superblocks and filesystem accounting information: <span style="color:#6
 <h2 id="boot-the-kernel-with-the-hard-disk">Boot the kernel with the hard disk<a href="#boot-the-kernel-with-the-hard-disk" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>Now, we&rsquo;ve everything set up. The only task at hand is to plug in the newly created hard disk to a QEMU VM and instruct the kernel to treat that hard disk as the <em>new_root</em>.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img -m 1G -hda kernel-hd -append <span style="color:#e6db74">&#34;root=/dev/sda&#34;</span>
-</code></pre></div><p>
-  <img src="/posts//images/linux-boot/no-hdd2.jpg"  alt="no-hdd2"  class="center"  style="margin:20px"  />
-
-
+</code></pre></div><p><img src="/images/linux-boot/no-hdd2.jpg" alt="no-hdd2">
 Wait, what !?</p>
 <p>Hmm, something is not quite right.<br>
 It turns out the kernel cannot continue to boot without some basic files (the OS) in the root filesystem (the hard disk)</p>
@@ -241,10 +232,7 @@ Set a root password in your little OS that you&rsquo;ve just created.</p>
 <p>Rerun the following command</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ qemu-system-x86_64 -kernel vmlinuz-linux -initrd initramfs.img -m 1G -hda kernel-hd -append <span style="color:#e6db74">&#34;root=/dev/sda&#34;</span>
 </code></pre></div><p>and finally you&rsquo;ll be greeted with</p>
-
-  <img src="/posts//images/linux-boot/login-screen.jpg"  alt="login-screen"  class="center"  style="margin:20px"  />
-
-
+<p><img src="/images/linux-boot/login-screen.jpg" alt="login-screen"></p>
 <p>Login with the credentials you set before and enjoy!</p>
 <h1 id="wtf-">WTF ?<a href="#wtf-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <h2 id="root-account-is-locked">Root account is locked<a href="#root-account-is-locked" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>

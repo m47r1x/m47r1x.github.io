@@ -234,7 +234,7 @@ Set a root password in your little OS that you&rsquo;ve just created.</p>
 </code></pre></div><p>and finally you&rsquo;ll be greeted with</p>
 <p><img src="/images/linux-boot/login-screen.jpg" alt="login-screen"></p>
 <p>Login with the credentials you set before and enjoy!</p>
-<h1 id="wtf-">WTF ?<a href="#wtf-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
+<h1 id="wth-">WTH ?<a href="#wth-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <h2 id="root-account-is-locked">Root account is locked<a href="#root-account-is-locked" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>If something goes wrong in the initramfs phase and you see <code>root account is locked</code>, you can unlock the root account by creating a <code>mkinitcpio.conf</code> file as follows:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Required</span>
@@ -260,6 +260,8 @@ Thanks to <code>sheep</code> from freenode IRC for the suggestion.</p>
 <p>Because it&rsquo;s the best. Feel free to write your own OS files. Maybe another time.</p>
 <h2 id="still-dont-want-arch">Still don&rsquo;t want Arch<a href="#still-dont-want-arch" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
 <p>Sure, you should head into <a href="http://www.linuxfromscratch.org/lfs/">Linux From Scratch</a>. Also, you may <a href="#root-account-is-locked">unlock the root account</a> and use <code>journalctl</code> to look into what the kernel is error-ing for.</p>
+<h2 id="dont-want-an-os-at-all">Don&rsquo;t want an OS at all<a href="#dont-want-an-os-at-all" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h2>
+<p>First, <a href="#root-account-is-locked">unlock the root account</a> and don&rsquo;t create a Hard Disk at all. You&rsquo;d be able to log into the initramfs after boot. Explore, enjoy.</p>
 <h1 id="afterwords">Afterwords<a href="#afterwords" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h1>
 <p>Now you know that Linux itself is <strong>not</strong> an operating system. It&rsquo;s just a kernel. A part of the operating system. The entire operating system (or distro) consists of the kernel, accompanying initramfs, the root file system and the community.</p>
 

@@ -7,7 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>(c) Zion</copyright>
-    <lastBuildDate>Fri, 18 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 17 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Loading and probing of USB device drivers</title>
+      <link>/posts/driver-loading-and-binding/</link>
+      <pubDate>Mon, 17 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/driver-loading-and-binding/</guid>
+      <description>The Linux USB driver expects a probe function which is called when a matching device is plugged in.
+ When a device is plugged into the USB bus that matches the device ID pattern that your driver registered with the USB core, the probe function is called.
+ Device operation   Following are some questions that have appeared on the internet time and again.
+When will probe function be called ?</description>
+    </item>
+    
     <item>
       <title>Manually booting the Linux kernel inside QEMU</title>
       <link>/posts/linux-boot/</link>

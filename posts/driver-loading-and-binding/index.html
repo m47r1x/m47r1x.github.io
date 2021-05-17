@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <title>Loading and probing of USB device drivers :: The M47r1x — The Return of Neo</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="description" content="The Linux USB driver expects a probe function which is called when a matching device is plugged in.
+ When a device is plugged into the USB bus that matches the device ID pattern that your driver registered with the USB core, the probe function is called.
+ Device operation   Following are some questions that have appeared on the internet time and again.
+When will probe function be called ?" />
+<meta name="keywords" content="kernel, hotplugging, hotplug, usb, driver, probe, module_init" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="/posts/driver-loading-and-binding/" />
+
+
+
+
+<link rel="stylesheet" href="/assets/style.css">
+
+  <link rel="stylesheet" href="/assets/blue.css">
+
+
+
+
+
+
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/img/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/img/favicon/blue.png">
+
+
+
+<meta name="twitter:card" content="summary" />
+
+  <meta name="twitter:site" content="https://m47r1x.github.io" />
+
+<meta name="twitter:creator" content="" />
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Loading and probing of USB device drivers :: The M47r1x">
+<meta property="og:description" content="The Linux USB driver expects a probe function which is called when a matching device is plugged in.
+ When a device is plugged into the USB bus that matches the device ID pattern that your driver registered with the USB core, the probe function is called.
+ Device operation   Following are some questions that have appeared on the internet time and again.
+When will probe function be called ?" />
+<meta property="og:url" content="/posts/driver-loading-and-binding/" />
+<meta property="og:site_name" content="Loading and probing of USB device drivers" />
+
+  
+    <meta property="og:image" content="/img/favicon/blue.png">
+  
+
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+  <meta property="article:published_time" content="2021-05-17 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body class="">
+
+
+<div class="container center headings--one-size">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    The M47r1x
+  </div>
+</a>
+
+    </div>
+    <div class="menu-trigger">menu</div>
+  </div>
+  
+    <nav class="menu">
+  <ul class="menu__inner menu__inner--desktop">
+    
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+      
+    
+
+    
+  </ul>
+
+  <ul class="menu__inner menu__inner--mobile">
+    
+      
+        <li><a href="/about">About</a></li>
+      
+    
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<div class="post">
+  <h1 class="post-title">
+    <a href="/posts/driver-loading-and-binding/">Loading and probing of USB device drivers</a></h1>
+  <div class="post-meta">
+      
+    <span class="post-date">
+      2021-05-17
+    </span>
+    
+    
+  </div>
+
+  
+
+  
+
+  <div class="post-content"><div>
+        <p>The Linux USB driver expects a <a href="https://www.kernel.org/doc/html/v4.12/driver-api/usb/usb.html#c.usb_driver">probe function</a> which is called when a matching device is plugged in.</p>
+<blockquote>
+<p>When a device is plugged into the USB bus that matches the device ID pattern that your driver registered with the USB core, the probe function is called.</p>
+<ul>
+<li><a href="https://www.kernel.org/doc/html/v4.12/driver-api/usb/writing_usb_driver.html#device-operation">Device operation</a></li>
+</ul>
+</blockquote>
+<p>Following are some questions that have appeared on the internet time and again.</p>
+<h3 id="when-will-probe-function-be-called-">When will probe function be called ?<a href="#when-will-probe-function-be-called-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>When a matching entry registered in MODULE_DEVICE_TABLE is found for the device.</p>
+<h3 id="if-there-are-two-matches-to-module_device_table-would-both-probes-be-called-">If there are two matches to MODULE_DEVICE_TABLE, would both probes be called ?<a href="#if-there-are-two-matches-to-module_device_table-would-both-probes-be-called-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>No, only the one which binds to the device successfully.</p>
+<h3 id="would-all-the-modules-always-be-loaded-if-they-contain-a-matching-entry-in-module_device_table-">Would <strong>all</strong> the modules always be loaded if they contain a matching entry in MODULE_DEVICE_TABLE ?<a href="#would-all-the-modules-always-be-loaded-if-they-contain-a-matching-entry-in-module_device_table-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>By loading, call to <code>module_init</code> is reffered.<br>
+Considering the case of udev, it&rsquo;s the <a href="https://unix.stackexchange.com/a/417004/154333">responsibility of udev</a> to load kernel modules. The following confirms it:</p>
+<blockquote>
+<p>Device drivers compiled as modules may have aliases built into them. Aliases are visible in the output of the modinfo program and are usually related to the bus-specific identifiers of devices supported by a module.<br>
+For example, the snd-fm801 driver supports PCI devices with vendor ID 0x1319 and device ID 0x0801, and has an alias of “pci:v00001319d00000801sv<em>sd</em>bc04sc01i*”. For most devices, the bus driver exports the alias of the driver that would handle the device via sysfs. E.g., the /sys/bus/pci/devices/0000:00:0d.0/modalias file might contain the string “pci:v00001319d00000801sv00001319sd00001319bc04sc01i00”.<br>
+The default rules provided with udev will cause udevd to call out to /sbin/modprobe with the contents of the MODALIAS uevent environment variable (which should be the same as the contents of the modalias file in sysfs), thus loading all modules whose aliases match this string after wildcard expansion</p>
+<ul>
+<li><a href="https://www.linuxfromscratch.org/lfs/view/development/chapter09/udev.html">9.3.2.3. Module Loading</a></li>
+</ul>
+</blockquote>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p>Notice the last line, <em>&ldquo;thus loading all modules whose aliases match this string after wildcard expansion&rdquo;</em>. So yes! All modules will be loaded.</p>
+<h3 id="my-module_init-was-called-by-probe-was-not">My module_init() was called by probe was not<a href="#my-module_init-was-called-by-probe-was-not" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>See above</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<h3 id="udev-accesses-same-info-in-order-to-figure-out-the-device-driver-pair-is-that-table-accessible-by-any-userland-program--where">Udev accesses same info in order to figure out the device, driver pair. Is that table accessible by any userland program ? Where?<a href="#udev-accesses-same-info-in-order-to-figure-out-the-device-driver-pair-is-that-table-accessible-by-any-userland-program--where" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">modinfo module_name
+</code></pre></div><p>The <code>alias</code> is matched against the device.</p>
+<h3 id="in-what-order-will-the-kernel-decide-to-give-opportunities-to-device-drivers-to-bind-to-a-device-">In what order will the kernel decide to give opportunities to device drivers to bind to a device ?<a href="#in-what-order-will-the-kernel-decide-to-give-opportunities-to-device-drivers-to-bind-to-a-device-" class="hanchor" ariaLabel="Anchor">&#8983;</a> </h3>
+<p>Load order is no one&rsquo;s responsibility.
+Without any priority, either driver may be probed first and consequently may end up binding to the device; the
+result is more or less random.
+It may even differ from one boot to the next.</p>
+<p>Thanks to Alan Stern from <a href="https://marc.info/?l=linux-usb&amp;m=162123892329464&amp;w=2">linux-usb mailing list</a> to clarify this to me. I highly recommend to read <a href="https://marc.info/?l=linux-usb&amp;m=162123892329464&amp;w=2">the thread</a> and look at <code>dd.c</code>, <code>bus.c</code> in <code>drivers/base</code>.</p>
+<p>If you happen to find any discrepancies, do send me a <a href="/about">note</a>.</p>
+
+      </div></div>
+  
+  <div class="pagination">
+    <div class="pagination__title">
+      <span
+        class="pagination__title-h">Read other posts</span>
+      <hr />
+    </div>
+    <div class="pagination__buttons">
+      
+      
+      <span class="button next">
+        <a href="/posts/linux-boot/">
+          <span class="button__text">Manually booting the Linux kernel inside QEMU</span>
+          <span class="button__icon">→</span>
+        </a>
+      </span>
+      
+    </div>
+  </div>
+  
+
+  
+
+</div>
+
+  </div>
+
+  
+    <footer class="footer">
+  <div class="footer__inner">
+    
+      <div class="copyright copyright--user">
+        <span>(c) Zion</span>
+    
+        <span>:: Theme made by <a href="https://twitter.com/panr">panr</a></span>
+      </div>
+  </div>
+</footer>
+
+<script src="/assets/main.js"></script>
+<script src="/assets/prism.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>
